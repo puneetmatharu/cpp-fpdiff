@@ -1,0 +1,47 @@
+---
+# ------------------------------------------------------------------------------
+
+name: Ubuntu
+
+on: push
+
+# ------------------------------------------------------------------------------
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install ninja-build libboost-all-dev
+          wget https://github.com/sharkdp/hyperfine/releases/download/v1.15.0/hyperfine_1.15.0_amd64.deb && sudo dpkg -i hyperfine_1.15.0_amd64.deb
+
+      - name: Build
+        run: cmake -G Ninja -B build && cmake --build build
+
+      - name: Benchmark
+        run: |
+          python3 validate.py -e fpdiff.py -o validation-python.log --benchmark
+          python3 validate.py -e build/fpdiff -o validation-zlib.log --benchmark
+          python3 validate.py -e build/fpdiff_boost -o validation-boost.log --benchmark
+
+      - name: Test
+        id: compare
+        run: |
+          cmp validation-python.log validation-zlib.log || echo "ZLib implementation failed!" && exit 1
+          cmp validation-python.log validation-boost.log || echo "Boost implementation failed!" && exit 1
+        continue-on-error: true
+
+      - name: Upload validation log file
+        uses: actions/upload-artifact@v2
+        with:
+          name: logs
+          path: ./validation-*.log
+
+      - name: Propagate test status
+        if: steps.compare.outcome == 'failure'
+        run: exit 1
+# ------------------------------------------------------------------------------
