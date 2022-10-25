@@ -1,4 +1,6 @@
+import os
 import shutil
+import stat
 import subprocess
 import sys
 from argparse import ArgumentParser, Namespace
@@ -91,6 +93,10 @@ def main():
     script = generate_test_script(executor=executor, log_file=args.output_file)
     with open(script_fpath, "w") as f:
         f.write(script)
+
+    # Make it executable
+    st = os.stat(script_fpath)
+    os.chmod(script_fpath, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
     # Run
     return_code = run(script_path=script_fpath, benchmark=args.benchmark)
