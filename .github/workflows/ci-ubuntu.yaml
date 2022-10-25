@@ -31,11 +31,12 @@ jobs:
       - name: Test
         id: compare
         run: |
-          cmp validation-python.log validation-zlib.log || echo "ZLib implementation failed!" && exit 1
-          cmp validation-python.log validation-boost.log || echo "Boost implementation failed!" && exit 1
+          cmp validation-python.log validation-zlib.log || ( echo "ZLib implementation failed." && exit 1 )
+          cmp validation-python.log validation-boost.log || ( echo "Boost implementation failed." && exit 1 )
         continue-on-error: true
 
       - name: Upload validation log file
+        if: steps.compare.outcome == 'failure'
         uses: actions/upload-artifact@v2
         with:
           name: logs

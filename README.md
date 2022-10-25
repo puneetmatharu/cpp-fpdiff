@@ -2,18 +2,22 @@
 
 ## Building
 
-To build the code you will need [CMake](https://cmake.org/download/) and [Ninja](https://ninja-build.org):
+To build the code you will need [CMake](https://cmake.org/download/)
 
 ```bash
-cmake -G Ninja -B build
-cmake --build build
+cmake -B build && cmake --build build
+```
+
+If you have [Ninja](https://ninja-build.org), you can specify it as the build generator by running the following command instead:
+
+```bash
+cmake -G Ninja -B build && cmake --build build
 ```
 
 If you are on an Apple MacBook with an M-series chip, you should run the command below instead to ensure the build is optimised for the Arm architecture:
 
 ```bash
-CMAKE_APPLE_SILICON_PROCESSOR="arm64" cmake -G Ninja -B build
-cmake --build build
+CMAKE_APPLE_SILICON_PROCESSOR="arm64" cmake -G Ninja -B build && cmake --build build
 ```
 
 In the build directory, you should now see the executable `fpdiff` and possibly `fpdiff_boost` (if you possess the Boost library). You can use these binaries when running the `validate.py` script.

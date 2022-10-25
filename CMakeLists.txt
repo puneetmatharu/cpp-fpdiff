@@ -1,7 +1,7 @@
 # ==============================================================================
 
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
-project(fpdiff VERSION 0.0.1)
+project(fpdiff VERSION 1.0.0)
 enable_testing()
 
 # Set C++ standard
@@ -13,14 +13,7 @@ if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 endif()
 
-# Silence Apple warning
-if(APPLE)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
-endif()
-
 # ---------------------------[ VERSION 1: USE BOOST ]---------------------------
-
-# FIXME: Argh! Boost might not always be provided!
 
 # Search for Boost
 find_package(
