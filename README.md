@@ -2,17 +2,21 @@
 
 ## Building
 
+To build the code you will need [CMake](https://cmake.org/download/) and [Ninja](https://ninja-build.org):
+
 ```bash
 cmake -G Ninja -B build
+cmake --build build
 ```
 
-If you are on an Apple MacBook with an M-series chip, you should instead run the command below to ensure the build is optimised for Arm architecture:
+If you are on an Apple MacBook with an M-series chip, you should run the command below instead to ensure the build is optimised for the Arm architecture:
 
 ```bash
 CMAKE_APPLE_SILICON_PROCESSOR="arm64" cmake -G Ninja -B build
+cmake --build build
 ```
 
-In the build directory, you should see the executable `fpdiff` and possibly `fpdiff_boost` (if you possess the Boost library). You can use these binaries when running the `validate.py` script.
+In the build directory, you should now see the executable `fpdiff` and possibly `fpdiff_boost` (if you possess the Boost library). You can use these binaries when running the `validate.py` script.
 
 ## Validating
 
@@ -69,3 +73,7 @@ Benchmark 1: ./run_script.sh
 | `fpdiff.py`          | 682.5 ms ±  19.0 ms |
 | `build/fpdiff`       | 61.1 ms ± 7.1 ms    |
 | `build/fpdiff_boost` | 82.0 ms ± 6.3 ms    |
+
+## License
+
+The code in `fpdiff.py` has been borrowed from the [`oomph-lib`](https://github.com/oomph-lib/oomph-lib) repository and thus falls under the licensing conditions of that repository (see [LICENSE](./LICENCE)). The remaining code also falls under the purview of this license.
