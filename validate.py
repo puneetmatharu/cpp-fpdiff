@@ -20,7 +20,7 @@ def run(script_path: Union[str, Path], benchmark: bool = False) -> None:
             raise SystemError("Unable to find command 'hyperfine'.")
         print(f"Found hyperfine: {hyperfine_path}")
         run_command = f"{hyperfine_path} --warmup=10 {run_command}"
-    print(f"\nRunning: '{run_command}'\n")
+    print(f"\nRunning command: '{run_command}'")
     return subprocess.run(run_command, shell=True).returncode
 
 

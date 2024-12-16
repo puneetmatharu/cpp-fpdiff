@@ -20,7 +20,7 @@ If you are on an Apple MacBook with an M-series chip, you should run the command
 CMAKE_APPLE_SILICON_PROCESSOR="arm64" cmake -G Ninja -B build && cmake --build build
 ```
 
-In the build directory, you should now see the executable `fpdiff` and possibly `fpdiff_boost` (if you possess the Boost library). You can use these binaries when running the `validate.py` script.
+In the build directory, you should now see the executables `fpdiff_zlib`, `fpdiff_miniz` and possibly `fpdiff_boost` (if you possess the Boost library). You can use these binaries when running the `validate.py` script.
 
 ## Validating
 
@@ -32,10 +32,10 @@ You can validate the built binaries using `validate.py`. To see the available co
 python3 validate.py -e fpdiff.py -o validation.log
 ```
 
-**Example:** Validate `build/fpdiff` and output to `validation.log`:
+**Example:** Validate `build/fpdiff_zlib` and output to `validation.log`:
 
 ```bash
-python3 validate.py -e build/fpdiff -o validation.log --benchmark
+python3 validate.py -e build/fpdiff_zlib -o validation.log --benchmark
 ```
 
 The `validate.py` script will generate a bash script named `run_script.sh` to run the test cases. You can inspect this file to see the individual commands that are run. Notice that when `fpdiff.py` is specified, `python3` command is automatically prepended to each command.
@@ -57,10 +57,10 @@ Benchmark 1: ./run_script.sh
   Range (min … max):   664.4 ms … 719.6 ms    10 runs
 ```
 
-**Example:** Validate `build/fpdiff` and output to `validation.log`:
+**Example:** Validate `build/fpdiff_zlib` and output to `validation.log`:
 
 ```bash
-❯ python3 validate.py -e build/fpdiff -o validation.log --benchmark
+❯ python3 validate.py -e build/fpdiff_zlib -o validation.log --benchmark
 Found hyperfine: /opt/homebrew/bin/hyperfine
 
 Running: '/opt/homebrew/bin/hyperfine --warmup=10 ./run_script.sh'
@@ -75,8 +75,9 @@ Benchmark 1: ./run_script.sh
 | Tool                 | Time                |
 |----------------------|---------------------|
 | `fpdiff.py`          | 682.5 ms ±  19.0 ms |
-| `build/fpdiff`       | 61.1 ms ± 7.1 ms    |
 | `build/fpdiff_boost` | 82.0 ms ± 6.3 ms    |
+| `build/fpdiff_zlib`  | 61.1 ms ± 7.1 ms    |
+| `build/fpdiff_miniz` |                     |
 
 ## License
 

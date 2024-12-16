@@ -10,10 +10,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 # Build in debugging mode by default
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+  set(CMAKE_BUILD_TYPE
+      "Release"
+      CACHE STRING "" FORCE)
 endif()
 
-# ---------------------------[ VERSION 1: USE BOOST ]---------------------------
+# ---------------------------------[ PACKAGES ]---------------------------------
 
 # Search for Boost
 find_package(
@@ -21,29 +23,16 @@ find_package(
   COMPONENTS iostreams
   QUIET)
 
-if(Boost_FOUND)
-  # Define target and link to Boost libraries
-  add_executable(fpdiff_boost fpdiff_boost.cc)
-  target_link_libraries(fpdiff_boost PRIVATE Boost::iostreams)
+set(OVERRIDE_FIND_PACKAGE TRUE)
+set(ENABLE_NEXT_GEN_ZLIB FALSE)
 
-  # Symlink the data/ folder into the build/ directory when building
-  add_custom_command(
-    TARGET fpdiff_boost COMMAND ln -sf "${CMAKE_CURRENT_LIST_DIR}/data"
-                                "${CMAKE_CURRENT_BINARY_DIR}")
-
-  # Add test
-  add_test(
-    NAME fpdiff_boost
-    COMMAND ${BASH_PROGRAM} fpdiff_boost
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+# See if we can find zlib
+if(NOT OVERRIDE_FIND_PACKAGE)
+  find_package(ZLIB REQUIRED)
 endif()
 
-# ---------------------------[ VERSION 2: USE ZLIB ]----------------------------
-
-# Find ZLib
-find_package(ZLIB REQUIRED)
-if(NOT ZLIB_FOUND)
-  # Download the zlib library
+# Download it ourselves
+if((NOT ZLIB_FOUND) OR (OVERRIDE_FIND_PACKAGE))
   include(FetchContent)
   FetchContent_Declare(
     zlib
@@ -54,19 +43,86 @@ if(NOT ZLIB_FOUND)
   FetchContent_MakeAvailable(zlib)
 endif()
 
-# Define target and link to Boost libraries
-add_executable(fpdiff fpdiff.cc fpdiff.h)
-target_link_libraries(fpdiff PRIVATE ZLIB::ZLIB)
+# ---------------------------[ VERSION 1: USE BOOST ]---------------------------
 
-# Symlink the data/ folder into the build/ directory when building fpdiff
+if(Boost_FOUND)
+  set(TEST_NAME fpdiff_boost)
+
+  # Define target and link to Boost libraries
+  add_executable(${TEST_NAME} ${TEST_NAME}.cc)
+  target_link_libraries(${TEST_NAME} PRIVATE Boost::iostreams)
+
+  # Symlink the data/ folder into the build/ directory when building
+  add_custom_command(
+    TARGET ${TEST_NAME} COMMAND ln -sf "${CMAKE_CURRENT_LIST_DIR}/data"
+                                "${CMAKE_CURRENT_BINARY_DIR}")
+
+  # Add test
+  add_test(
+    NAME ${TEST_NAME}
+    COMMAND ${BASH_PROGRAM} ${TEST_NAME}
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+endif()
+
+# ---------------------------[ VERSION 2: USE ZLIB ]----------------------------
+
+set(TEST_NAME fpdiff_zlib)
+
+# Define target and link to Boost libraries
+add_executable(${TEST_NAME} ${TEST_NAME}.cc)
+target_link_libraries(${TEST_NAME} PRIVATE ZLIB::ZLIB)
+
+# Symlink the data/ folder into the build/ directory when building
 add_custom_command(
-  TARGET fpdiff COMMAND ln -sf "${CMAKE_CURRENT_LIST_DIR}/data"
-                        "${CMAKE_CURRENT_BINARY_DIR}")
+  TARGET ${TEST_NAME} COMMAND ln -sf "${CMAKE_CURRENT_LIST_DIR}/data"
+                              "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Add test
 add_test(
-  NAME fpdiff
-  COMMAND ${BASH_PROGRAM} fpdiff
+  NAME ${TEST_NAME}
+  COMMAND ${BASH_PROGRAM} ${TEST_NAME}
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+# ----------------------------[ BASIC GZIP PARSER ]-----------------------------
+
+set(TEST_NAME gzip_parser)
+
+add_library(gzip_reader STATIC gzip_reader.cc gzip_reader.h)
+target_link_libraries(gzip_reader PRIVATE ZLIB::ZLIB)
+target_include_directories(gzip_reader PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+# Define target and link to Boost libraries
+add_executable(${TEST_NAME} ${TEST_NAME}.cc)
+target_link_libraries(${TEST_NAME} PRIVATE gzip_reader)
+
+# Symlink the data/ folder into the build/ directory when building
+add_custom_command(
+  TARGET ${TEST_NAME} COMMAND ln -sf "${CMAKE_CURRENT_LIST_DIR}/data"
+                              "${CMAKE_CURRENT_BINARY_DIR}")
+
+# Add test
+add_test(
+  NAME ${TEST_NAME}
+  COMMAND ${BASH_PROGRAM} ${TEST_NAME}
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+# ----------------------------[ BASIC GZIP PARSER ]-----------------------------
+
+set(TEST_NAME load_gzip)
+
+# Define target and link to Boost libraries
+add_executable(${TEST_NAME} ${TEST_NAME}.cc)
+target_link_libraries(${TEST_NAME} PRIVATE gzip_reader)
+
+# Symlink the data/ folder into the build/ directory when building
+add_custom_command(
+  TARGET ${TEST_NAME} COMMAND ln -sf "${CMAKE_CURRENT_LIST_DIR}/data"
+                              "${CMAKE_CURRENT_BINARY_DIR}")
+
+# Add test
+add_test(
+  NAME ${TEST_NAME}
+  COMMAND ${BASH_PROGRAM} ${TEST_NAME}
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 # ------------------------------------------------------------------------------
